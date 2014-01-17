@@ -18,7 +18,8 @@ class IndexView(views.View):
 
     def dispatch_request(self):
 
-        return "hello world"
+        return render_template("index.html")
+        # return "hello world"
 
 ##Base View Class (for POSTs and GETs)
 class APIView(views.MethodView):
@@ -48,9 +49,6 @@ class APIView(views.MethodView):
     def validate_json_request(self, request):
         if not request.json:
             return False
-        # if not "key" in request.json:
-        #     return False
-        # return self.check_api_key(request.json["key"])
         return True
 
 
@@ -80,7 +78,6 @@ class APIView(views.MethodView):
             modelName = self.get_model_name()
             return jsonify( self.pack_item_for_JSON(item) )
 
-    #curl --user admin:123 -i -H "Content-Type: application/json" -X DELETE -d '{}' http://localhost:5000/api/v1/things/6
     def delete(self, item_id):
 
         if not current_user.is_authenticated():
@@ -186,6 +183,10 @@ def load_user_from_header(header_val):
     name = header_val.split(":")[0]
     key = header_val.split(":")[1]
     return models.User.query.filter(and_(models.User.api_key==key, models.User.name==name)).first()
+
+@login_manager.user_loader
+def load_user(username):
+    return models.User.query.filter_by(name=username).first()
 
 
 
